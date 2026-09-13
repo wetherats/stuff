@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Key Vault</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #14171c;
+    --surface: #1b1f27;
+    --surface-hover: #222733;
+    --border: #2a303c;
+    --text: #e8eaed;
+    --text-muted: #8891a0;
+    --gold: #e3b341;
+    --gold-dim: #6b5a2c;
+    --green: #5fbf88;
+    --gray: #5a6270;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  header{
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  h1{
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .sub{
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .sub strong{
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .row:last-child{ border-bottom: none; }
+
+  .row-main{
+    flex: 1;
+    min-width: 0;
+  }
+
+  .name{
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    overflow-wrap: anywhere;
+  }
+
+  .meta{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .rating{
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+
+  .rating.overwhelming{ color: var(--green); border-color: var(--green); background: rgba(95,191,136,0.08); }
+  .rating.very{ color: var(--green); border-color: rgba(95,191,136,0.5); background: rgba(95,191,136,0.05); }
+  .rating.mostly{ color: #b8c26a; border-color: rgba(184,194,106,0.5); background: rgba(184,194,106,0.05); }
+  .rating.none{ color: var(--gray); border-color: var(--gray); background: transparent; }
+
+  .price{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .action{
+    flex-shrink: 0;
+  }
+
+  button.claim{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  button.claim:hover{
+    background: var(--gold);
+    color: #14171c;
+  }
+
+  button.claim:disabled{
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  .keybox{
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .key{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  button.copy{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  button.copy:hover{
+    color: var(--text);
+    border-color: var(--text-muted);
+  }
+
+  .claimed-tag{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .unavailable{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .loading, .empty{
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 24px 4px;
+  }
+
+  footer{
+    margin-top: 32px;
+    color: var(--gray);
+    font-size: 12px;
+    text-align: left;
+  }
+
+  @media (max-width: 520px){
+    .row{ flex-wrap: wrap; }
+    .action, .keybox{ margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Key Vault</h1>
+    <p class="sub" id="subtitle">Loading keys…</p>
+  </header>
+  <div id="list"></div>
+  <footer>Claiming a key marks it used for everyone with this link.</footer>
+</div>
+
+<script>
+const GAMES = [
+  { name: "Sledders", key: "MY57Y-RLB0J-GAPG9", rating: "Overwhelmingly Positive", price: 29.99 },
+  { name: "Neon White", key: "N49M0-TFN46-04WBM", rating: "Overwhelmingly Positive", price: 24.99 },
+  { name: "Like a Dragon: Infinite Wealth", key: "M285M-CKIFE-MWHER", rating: "Very Positive", price: 69.99 },
+  { name: "SONIC X SHADOW GENERATIONS", key: "8MMKH-PCDHI-ZE673", rating: "Very Positive", price: 49.99 },
+  { name: "Sea of Stars: Sunset Edition", key: "M4RW4-89QLM-DZ2FA", rating: "Very Positive", price: 34.99 },
+  { name: "Teenage Mutant Ninja Turtles: Shredder's Revenge - Ultimate Edition", key: "LYI9G-38025-YYER3", rating: "Very Positive", price: 32.99 },
+  { name: "Tunic", key: "NNLY4-VRP04-VPGP2", rating: "Very Positive", price: 29.99 },
+  { name: "Construction Simulator", key: "WT57M-DVKK7-MDXDY", rating: "Very Positive", price: 24.99 },
+  { name: "Hell Clock", key: "Y73ZL-35TPX-V7ZBB", rating: "Very Positive", price: 19.99 },
+  { name: "Pocket Mirror ~ GoldenerTraum", key: "69P8N-MMDRE-8KTI0", rating: "Very Positive", price: 19.99 },
+  { name: "Decktamer", key: "MIJ0I-4TKZ6-8QIQK", rating: "Very Positive", price: 15.99 },
+  { name: "Dicefolk", key: "P8YQH-HJ9MB-4NQ8P", rating: "Very Positive", price: 14.99 },
+  { name: "Drop Duchy - Complete Edition", key: "NFAGI-C0E8Z-QL0W3", rating: "Very Positive", price: 14.99 },
+  { name: "Gatekeeper", key: "MP0YF-4BQW0-8974A", rating: "Very Positive", price: 14.99 },
+  { name: "Ballionaire", key: "7JV7I-9859I-TTJBE", rating: "Very Positive", price: 12.34 },
+  { name: "Urban Jungle", key: "72J9F-KQCYH-D2G22", rating: "Very Positive", price: 11.99 },
+  { name: "Conquest Dark", key: "JI0FB-0MW57-C3CWW", rating: "Very Positive", price: 9.99 },
+  { name: "GUNTOUCHABLES", key: "63726-643MJ-QNLXJ", rating: "Very Positive", price: 4.99 },
+  { name: "Frostpunk 2", key: "7EHFW-K4DTZ-W2KNQ", rating: "Mostly Positive", price: 44.99 },
+  { name: "Dark Envoy", key: "M7DED-F5HX3-3A6HQ", rating: "Mostly Positive", price: 29.99 },
+  { name: "Police Simulator: Patrol Officers", key: "KG4WA-AH4P7-5FKVI", rating: "Mostly Positive", price: 29.99 },
+  { name: "Voidtrain", key: "6LY3D-T6J05-ZWPCN", rating: "Mostly Positive", price: 29.99 },
+  { name: "Keylocker: Turn Based Cyberpunk Action", key: "6YQNB-3XD59-8TAXM", rating: "Mostly Positive", price: 19.99 },
+  { name: "Pile Up!", key: "MDFMJ-7QDHT-IAY3A", rating: "Mostly Positive", price: 9.99 },
+  { name: "Eldritch Escape Playtest", key: "6NDL6-5B6YX-LQ4FL", rating: "Not enough reviews", price: null }
+];
+
+const STORAGE_KEY = "claim-state";
+const listEl = document.getElementById("list");
+const subtitleEl = document.getElementById("subtitle");
+
+function ratingClass(r){
+  if(r === "Overwhelmingly Positive") return "overwhelming";
+  if(r === "Very Positive") return "very";
+  if(r === "Mostly Positive") return "mostly";
+  return "none";
+}
+
+let claimState = {};
+
+async function loadState(){
+  try{
+    const result = await window.storage.get(STORAGE_KEY, true);
+    claimState = result && result.value ? JSON.parse(result.value) : {};
+  }catch(e){
+    claimState = {};
+  }
+}
+
+async function saveState(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(claimState), true);
+    return true;
+  }catch(e){
+    console.error("Storage error:", e);
+    return false;
+  }
+}
+
+function render(){
+  const remaining = GAMES.filter((g, i) => g.price !== null && !claimState[i]).length;
+  subtitleEl.innerHTML = `<strong>${remaining}</strong> key${remaining === 1 ? "" : "s"} left to claim`;
+
+  listEl.innerHTML = "";
+
+  GAMES.forEach((game, i) => {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const main = document.createElement("div");
+    main.className = "row-main";
+    main.innerHTML = `
+      <p class="name">${game.name}</p>
+      <div class="meta">
+        <span class="rating ${ratingClass(game.rating)}">${game.rating}</span>
+        ${game.price !== null ? `<span class="price">$${game.price.toFixed(2)}</span>` : ""}
+      </div>
+    `;
+    row.appendChild(main);
+
+    const actionWrap = document.createElement("div");
+
+    if(game.price === null){
+      actionWrap.className = "unavailable";
+      actionWrap.textContent = "Not claimable";
+    } else if(claimState[i]){
+      actionWrap.className = "keybox";
+      actionWrap.innerHTML = `
+        <span class="key">${game.key}</span>
+        <button class="copy" data-copy="${game.key}">Copy</button>
+      `;
+    } else {
+      actionWrap.className = "action";
+      const btn = document.createElement("button");
+      btn.className = "claim";
+      btn.textContent = "Claim";
+      btn.addEventListener("click", () => claim(i, btn));
+      actionWrap.appendChild(btn);
+    }
+
+    row.appendChild(actionWrap);
+    listEl.appendChild(row);
+  });
+
+  listEl.querySelectorAll("button.copy").forEach(btn => {
+    btn.addEventListener("click", () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(() => { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+}
+
+async function claim(index, btn){
+  btn.disabled = true;
+  btn.textContent = "Claiming…";
+
+  // re-check latest state to avoid double-claiming a key someone else just took
+  await loadState();
+  if(claimState[index]){
+    render();
+    return;
+  }
+
+  claimState[index] = true;
+  const ok = await saveState();
+  if(!ok){
+    delete claimState[index];
+    btn.disabled = false;
+    btn.textContent = "Claim";
+    alert("Couldn't save your claim, try again.");
+    return;
+  }
+  render();
+}
+
+(async function init(){
+  await loadState();
+  render();
+})();
+</script>
+</body>
+</html>
